@@ -1,5 +1,12 @@
 # Homework 1: Imitation Learning
 
+## Report
+
+![train_log](./imgs/train_log.png)
+
+- Time embedding is needed for better performance. 
+- More inference time steps (20 vs 10) is minorly better.
+
 ## Setup
 
 This project uses `uv` for package management. `uv` is a Python package and environment manager from [Astral](https://astral.sh). It replaces tools like

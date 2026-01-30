@@ -88,7 +88,7 @@ class FlowMatchingPolicy(BasePolicy):
         super().__init__(state_dim, action_dim, chunk_size)
     
         input_dim = state_dim + action_dim * chunk_size + time_dim     
-        self.time_embedding = nn.Sequential(
+        self.time_embedding = nn.Sequential(            # time embedding is needed for better performance
             nn.Linear(1, time_dim),
             nn.GELU(),
             nn.Linear(time_dim, time_dim),
