@@ -12,6 +12,7 @@ import torch
 import tyro
 import wandb
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from hw1_imitation.data import (
     Normalizer,
@@ -20,7 +21,7 @@ from hw1_imitation.data import (
     load_pusht_zarr,
 )
 from hw1_imitation.model import build_policy, PolicyType
-from hw1_imitation.evaluation import Logger
+from hw1_imitation.evaluation import Logger, evaluate_policy
 
 LOGDIR_PREFIX = "exp"
 
@@ -108,6 +109,7 @@ def run_training(config: TrainConfig) -> None:
         batch_size=config.batch_size,
         shuffle=True,
         drop_last=True,
+        num_workers=8
     )
 
     model = build_policy(
@@ -128,9 +130,37 @@ def run_training(config: TrainConfig) -> None:
     logger = Logger(log_dir)
 
     ### TODO: PUT YOUR MAIN TRAINING LOOP HERE ###
+    model = torch.compile(model)
 
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=config.lr,
+        weight_decay=config.weight_decay,
+    )
+
+    for epoch in tqdm(range(config.num_epochs)):
+        for i, batch in enumerate(loader):
+            global_step = epoch * len(loader) + i
+            optimizer.zero_grad()
+            state, action_chunk = batch
+            loss = model.compute_loss(state.to(device), action_chunk.to(device))
+            loss.backward()
+            optimizer.step()
+            
+            if i % config.log_interval == 0:
+                wandb.log({"train/loss": loss.item()}, step=global_step)
+                logger.log({"train/loss": loss.item()}, step=global_step)
+            
+            if i % config.eval_interval == 0:
+                evaluate_policy(model, normalizer, device, 
+                                chunk_size=config.chunk_size,
+                                num_video_episodes=config.num_video_episodes, 
+                                video_size=config.video_size,
+                                flow_num_steps=config.flow_num_steps, 
+                                step = global_step,
+                                logger=logger)
+        
     logger.dump_for_grading()
-
 
 def main() -> None:
     config = parse_train_config()
