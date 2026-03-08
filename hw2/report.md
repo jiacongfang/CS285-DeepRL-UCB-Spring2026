@@ -34,3 +34,4 @@ By comparison, `lambda=0` never exceeded 150 and `lambda=0.95` also failed to me
 The LunarLander results match the usual bias-variance tradeoff: a moderate value such as `0.98` or `0.99` worked best because it retained some variance reduction from bootstrapping without becoming as biased as the `lambda=0` setting.
 
 # 4. InvertedPendulum
+It's a little dirty, and I try some settings. :-(
