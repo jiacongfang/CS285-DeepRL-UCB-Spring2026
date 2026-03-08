@@ -9,4 +9,3 @@ dist/
 .ruff_cache/
 
 exp/
-command.sh
