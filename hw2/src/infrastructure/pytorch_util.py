@@ -1,5 +1,5 @@
 from typing import Union
-
+import numpy as np
 import torch
 from torch import nn
 
@@ -80,5 +80,5 @@ def from_numpy(*args, **kwargs):
     return torch.from_numpy(*args, **kwargs).float().to(device)
 
 
-def to_numpy(tensor):
+def to_numpy(tensor) -> np.ndarray:
     return tensor.to('cpu').detach().numpy()
